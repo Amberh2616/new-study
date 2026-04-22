@@ -108,6 +108,8 @@ GROQ_API_KEY=your-groq-api-key
 FINANCIAL_DATASETS_API_KEY=your-financial-datasets-api-key
 ```
 
+Taiwan stock shortcuts are also supported in the app, for example `2330`, `TWSE:2330`, and `TPEX:8069`.
+
 4. Install Poetry (if not already installed):
 ```bash
 curl -sSL https://install.python-poetry.org | python3 -

@@ -46,7 +46,7 @@ export function StockAnalyzerNode({
   threeMonthsAgo.setMonth(today.getMonth() - 3);
   
   // Use persistent state hooks
-  const [tickers, setTickers] = useNodeState(id, 'tickers', 'AAPL,NVDA,TSLA');
+  const [tickers, setTickers] = useNodeState(id, 'tickers', '2330,2317,2454');
   const [runMode, setRunMode] = useNodeState(id, 'runMode', 'single');
   const [initialCash, setInitialCash] = useNodeState(id, 'initialCash', '100000');
   const [startDate, setStartDate] = useNodeState(id, 'startDate', threeMonthsAgo.toISOString().split('T')[0]);
@@ -257,12 +257,12 @@ export function StockAnalyzerNode({
                       <span>Tickers</span>
                     </TooltipTrigger>
                     <TooltipContent side="right">
-                      You can add multiple tickers using commas (AAPL,NVDA,TSLA)
+                      You can add multiple tickers using commas (2330,2317,2454 or 2330.TW,8069.TWO)
                     </TooltipContent>
                   </Tooltip>
                 </div>
                 <Input
-                  placeholder="Enter tickers"
+                  placeholder="2330,2317,2454"
                   value={tickers}
                   onChange={handleTickersChange}
                 />

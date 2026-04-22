@@ -2,15 +2,23 @@ import sys
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import argparse
-import questionary
 from colorama import Fore, Style
 
-from src.utils.analysts import ANALYST_ORDER
-from src.llm.models import LLM_ORDER, OLLAMA_LLM_ORDER, get_model_info, ModelProvider, find_model_by_name
-from src.utils.ollama import ensure_ollama_and_model
+try:
+    import questionary
+except ModuleNotFoundError:
+    questionary = None
 
+from src.utils.tickers import normalize_tickers
 from dataclasses import dataclass
 from typing import Optional
+
+
+def _require_questionary() -> None:
+    if questionary is None:
+        raise ModuleNotFoundError(
+            "questionary is required for interactive CLI prompts. Install project dependencies or provide flags like --tickers, --analysts, and --model."
+        )
 
 
 def add_common_args(
@@ -24,7 +32,7 @@ def add_common_args(
         "--tickers",
         type=str,
         required=require_tickers,
-        help="Comma-separated list of stock ticker symbols (e.g., AAPL,MSFT,GOOGL)",
+        help="Comma-separated list of ticker symbols (e.g., 2330,2317,2454 or AAPL,MSFT,GOOGL)",
     )
     if include_analyst_flags:
         parser.add_argument(
@@ -67,16 +75,19 @@ def add_date_args(parser: argparse.ArgumentParser, *, default_months_back: int |
 def parse_tickers(tickers_arg: str | None) -> list[str]:
     if not tickers_arg:
         return []
-    return [ticker.strip() for ticker in tickers_arg.split(",") if ticker.strip()]
+    return normalize_tickers(tickers_arg.split(","))
 
 
 def select_analysts(flags: dict | None = None) -> list[str]:
+    from src.utils.analysts import ANALYST_ORDER
+
     if flags and flags.get("analysts_all"):
         return [a[1] for a in ANALYST_ORDER]
 
     if flags and flags.get("analysts"):
         return [a.strip() for a in flags["analysts"].split(",") if a.strip()]
 
+    _require_questionary()
     choices = questionary.checkbox(
         "Select your AI analysts.",
         choices=[questionary.Choice(display, value=value) for display, value in ANALYST_ORDER],
@@ -103,6 +114,9 @@ def select_analysts(flags: dict | None = None) -> list[str]:
 
 
 def select_model(use_ollama: bool, model_flag: str | None = None) -> tuple[str, str]:
+    from src.llm.models import LLM_ORDER, OLLAMA_LLM_ORDER, get_model_info, ModelProvider, find_model_by_name
+    from src.utils.ollama import ensure_ollama_and_model
+
     model_name: str = ""
     model_provider: str | None = None
 
@@ -119,6 +133,7 @@ def select_model(use_ollama: bool, model_flag: str | None = None) -> tuple[str, 
             print(f"{Fore.RED}Model '{model_flag}' not found. Please select a model.{Style.RESET_ALL}")
 
     if use_ollama:
+        _require_questionary()
         print(f"{Fore.CYAN}Using Ollama for local LLM inference.{Style.RESET_ALL}")
         model_name = questionary.select(
             "Select your Ollama model:",
@@ -152,6 +167,7 @@ def select_model(use_ollama: bool, model_flag: str | None = None) -> tuple[str, 
             f"\nSelected {Fore.CYAN}Ollama{Style.RESET_ALL} model: {Fore.GREEN + Style.BRIGHT}{model_name}{Style.RESET_ALL}\n"
         )
     else:
+        _require_questionary()
         model_choice = questionary.select(
             "Select your LLM model:",
             choices=[questionary.Choice(display, value=(name, provider)) for display, name, provider in LLM_ORDER],

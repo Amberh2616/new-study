@@ -103,25 +103,31 @@ poetry install
 
 #### Run the AI Hedge Fund
 ```bash
-poetry run python src/main.py --ticker AAPL,MSFT,NVDA
+poetry run python src/main.py --tickers 2330,2317,2454
 ```
 
 You can also specify a `--ollama` flag to run the AI hedge fund using local LLMs.
 
 ```bash
-poetry run python src/main.py --ticker AAPL,MSFT,NVDA --ollama
+poetry run python src/main.py --tickers 2330,2317,2454 --ollama
 ```
 
 You can optionally specify the start and end dates to make decisions over a specific time period.
 
 ```bash
-poetry run python src/main.py --ticker AAPL,MSFT,NVDA --start-date 2024-01-01 --end-date 2024-03-01
+poetry run python src/main.py --tickers 2330,2317,2454 --start-date 2024-01-01 --end-date 2024-03-01
 ```
 
 #### Run the Backtester
 ```bash
-poetry run python src/backtester.py --ticker AAPL,MSFT,NVDA
+poetry run python src/backtester.py --tickers 2330,2317,2454
 ```
+
+Taiwan stock shortcuts are supported:
+
+- `2330` becomes `2330.TW`
+- `TWSE:2330` becomes `2330.TW`
+- `TPEX:8069` becomes `8069.TWO`
 
 **Example Output:**
 <img width="941" alt="Screenshot 2025-01-06 at 5 47 52 PM" src="https://github.com/user-attachments/assets/00e794ea-8628-44e6-9a84-8f8a31ad3b47" />

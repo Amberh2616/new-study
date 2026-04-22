@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from pydantic import BaseModel, Field, field_validator
 from typing import List, Optional, Dict, Any
 from src.llm.models import ModelProvider
+from src.utils.tickers import normalize_ticker, normalize_tickers
 from enum import Enum
 from app.backend.services.graph import extract_base_agent_key
 
@@ -23,6 +24,11 @@ class PortfolioPosition(BaseModel):
     ticker: str
     quantity: float
     trade_price: float
+
+    @field_validator('ticker')
+    @classmethod
+    def normalize_position_ticker(cls, value: str) -> str:
+        return normalize_ticker(value)
 
     @field_validator('trade_price')
     @classmethod
@@ -68,6 +74,11 @@ class BaseHedgeFundRequest(BaseModel):
     margin_requirement: float = 0.0
     portfolio_positions: Optional[List[PortfolioPosition]] = None
     api_keys: Optional[Dict[str, str]] = None
+
+    @field_validator('tickers')
+    @classmethod
+    def normalize_request_tickers(cls, value: List[str]) -> List[str]:
+        return normalize_tickers(value)
 
     def get_agent_ids(self) -> List[str]:
         """Extract agent IDs from graph structure"""
